@@ -1,10 +1,12 @@
 package memstore.table;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import memstore.data.ByteFormat;
 import memstore.data.DataLoader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.TreeMap;
 
 /**
@@ -27,6 +29,21 @@ public class IndexedRowTable implements Table {
         this.indexColumn = indexColumn;
     }
 
+    /** HELPER METHOD
+     * Adds an int value (row id) to the treemap with key k.
+     */
+    public void addVal(int val, int k) {
+        if (!this.index.containsKey(k)) {
+            IntArrayList correspond_rows = new IntArrayList();
+            correspond_rows.add(val);
+            this.index.put(k, correspond_rows);
+        } else {
+            this.index.get(k).add(val);
+            // did the change propagate to the treemap or just
+            // locally to the intArrayList ? CHECK
+        }
+    }
+
     /**
      * Loads data into the table through passed-in data loader. Is not timed.
      *
@@ -36,6 +53,22 @@ public class IndexedRowTable implements Table {
     @Override
     public void load(DataLoader loader) throws IOException {
         // TODO: Implement this!
+        this.numCols = loader.getNumCols();
+        List<ByteBuffer> rows = loader.getRows();
+        numRows = rows.size();
+        this.rows = ByteBuffer.allocate(ByteFormat.FIELD_LEN * numRows * numCols);
+
+        for (int rowId = 0; rowId < numRows; rowId++) {
+            ByteBuffer curRow = rows.get(rowId);
+            for (int colId = 0; colId < numCols; colId++) {
+                int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
+                int col_value = curRow.getInt(ByteFormat.FIELD_LEN * colId);
+                this.rows.putInt(offset, col_value);
+                if(colId==this.indexColumn){
+                    addVal(rowId, col_value);
+                }
+            }
+        }
     }
 
     /**
@@ -44,7 +77,9 @@ public class IndexedRowTable implements Table {
     @Override
     public int getIntField(int rowId, int colId) {
         // TODO: Implement this!
-        return 0;
+        int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
+        int value = this.rows.getInt(offset);
+        return value;
     }
 
     /**
@@ -53,6 +88,19 @@ public class IndexedRowTable implements Table {
     @Override
     public void putIntField(int rowId, int colId, int field) {
         // TODO: Implement this!
+        int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
+
+        if(colId==this.indexColumn) {
+            // remove rowId from old value's IntArrayList in index
+            int old_value = this.rows.getInt(offset);
+            IntArrayList old_row_list = this.index.get(old_value);
+            old_row_list.rem(rowId);
+            // add rowId to new value's IntArrayList in index
+            addVal(rowId, field);
+        }
+        // finally add the value to the table
+        this.rows.putInt(offset, field);
+
     }
 
     /**
@@ -64,7 +112,12 @@ public class IndexedRowTable implements Table {
     @Override
     public long columnSum() {
         // TODO: Implement this!
-        return 0;
+        long required_sum = 0;
+        for (int rowId = 0; rowId < numRows; rowId++) {
+            int offset = ByteFormat.FIELD_LEN*rowId*numCols;
+            required_sum+=this.rows.getInt(offset);
+        }
+        return required_sum;
     }
 
     /**
@@ -77,7 +130,37 @@ public class IndexedRowTable implements Table {
     @Override
     public long predicatedColumnSum(int threshold1, int threshold2) {
         // TODO: Implement this!
-        return 0;
+        /**
+         * Check which of the 2 cols is indexColumn if any
+         * If there is an indexColumn then
+         * 1. create a loop that iterates through all the index keys >/< the threshold
+         *      Create a subloop to iterate through all the rowIds of a key
+         *          check for the alternate condition and make addition to the sum
+         * 2. If neither is an indexColumn, then paste the code from rowTable.java
+         */
+        long required_sum = 0;
+
+        if (this.indexColumn == 1){
+            int k = this.index.higherKey(threshold1);
+            // what if above returns a "null" key to int object
+            while(this.index.containsKey(k)){
+
+            }
+        }else if (this.indexColumn ==2){
+
+        }else{ // function same as that for rowTable.java
+            for (int rowId = 0; rowId < numRows; rowId++) {
+                int row_offset = ByteFormat.FIELD_LEN * rowId * numCols;
+                int col1_val = this.rows.getInt(row_offset + ByteFormat.FIELD_LEN);
+                if (col1_val > threshold1) {
+                    int col2_val = this.rows.getInt(row_offset + 2*ByteFormat.FIELD_LEN);
+                    if (col2_val < threshold2) {
+                        required_sum += this.rows.getInt(row_offset);
+                    }
+                }
+            }
+        }
+        return required_sum;
     }
 
     /**

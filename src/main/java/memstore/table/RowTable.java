@@ -5,6 +5,7 @@ import memstore.data.DataLoader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,7 +48,13 @@ public class RowTable implements Table {
     @Override
     public int getIntField(int rowId, int colId) {
         // TODO: Implement this!
-        return 0;
+//        if (rowId < 0 || rowId > numRows-1 || colId > numCols -1 || colId < 0){
+//            throw new IOException("invalid row or col Id");
+//        } else{
+        int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
+        int value = this.rows.getInt(offset);
+        return value;
+//        }
     }
 
     /**
@@ -56,6 +63,8 @@ public class RowTable implements Table {
     @Override
     public void putIntField(int rowId, int colId, int field) {
         // TODO: Implement this!
+        int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
+        this.rows.putInt(offset, field);
     }
 
     /**
@@ -67,7 +76,12 @@ public class RowTable implements Table {
     @Override
     public long columnSum() {
         // TODO: Implement this!
-        return 0;
+        long required_sum = 0;
+        for (int rowId = 0; rowId < numRows; rowId++) {
+            int offset = ByteFormat.FIELD_LEN*rowId*numCols;
+            required_sum+=this.rows.getInt(offset);
+        }
+        return required_sum;
     }
 
     /**
@@ -80,7 +94,18 @@ public class RowTable implements Table {
     @Override
     public long predicatedColumnSum(int threshold1, int threshold2) {
         // TODO: Implement this!
-        return 0;
+        long required_sum = 0;
+        for (int rowId = 0; rowId < numRows; rowId++) {
+            int row_offset = ByteFormat.FIELD_LEN * rowId * numCols;
+            int col1_val = this.rows.getInt(row_offset + ByteFormat.FIELD_LEN);
+            if (col1_val > threshold1) {
+                int col2_val = this.rows.getInt(row_offset + 2*ByteFormat.FIELD_LEN);
+                if (col2_val < threshold2) {
+                    required_sum += this.rows.getInt(row_offset);
+                }
+            }
+        }
+        return required_sum;
     }
 
     /**
@@ -92,7 +117,17 @@ public class RowTable implements Table {
     @Override
     public long predicatedAllColumnsSum(int threshold) {
         // TODO: Implement this!
-        return 0;
+        long running_sum = 0;
+        for (int rowId = 0; rowId < numRows; rowId++){
+            int row_offset = ByteFormat.FIELD_LEN*rowId*numCols;
+            int col0_val = this.rows.getInt(row_offset);
+            if (col0_val > threshold){
+                for (int colId = 0; colId < numCols; colId++){
+                    running_sum += this.rows.getInt(row_offset + ByteFormat.FIELD_LEN*colId);
+                }
+            }
+        }
+        return running_sum;
     }
 
     /**
@@ -104,6 +139,17 @@ public class RowTable implements Table {
     @Override
     public int predicatedUpdate(int threshold) {
         // TODO: Implement this!
-        return 0;
+        int updatedRows = 0;
+        for (int rowId = 0; rowId < numRows; rowId++) {
+            int row_offset = ByteFormat.FIELD_LEN * rowId * numCols;
+            int col0_val = this.rows.getInt(row_offset);
+            if (col0_val < threshold) {
+                updatedRows += 1;
+                int col3_val = this.rows.getInt(row_offset + ByteFormat.FIELD_LEN * 3);
+                int col2_val = this.rows.getInt(row_offset + ByteFormat.FIELD_LEN * 2);
+                this.rows.putInt(row_offset + ByteFormat.FIELD_LEN *3, col3_val + col2_val);
+            }
+        }
+        return updatedRows;
     }
 }

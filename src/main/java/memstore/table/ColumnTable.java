@@ -67,7 +67,11 @@ public class ColumnTable implements Table {
     @Override
     public long columnSum() {
         // TODO: Implement this!
-        return 0;
+        long sum = 0;
+        for (int rowId = 0; rowId<numRows; rowId++){
+            sum+=this.columns.getInt(ByteFormat.FIELD_LEN*rowId);
+        }
+        return sum;
     }
 
     /**
@@ -80,7 +84,19 @@ public class ColumnTable implements Table {
     @Override
     public long predicatedColumnSum(int threshold1, int threshold2) {
         // TODO: Implement this!
-        return 0;
+        long sum = 0;
+        for (int rowId = 0; rowId<numRows; rowId++){
+            int col1_offset = ByteFormat.FIELD_LEN*(numRows*1  + rowId);
+            int col2_offset = ByteFormat.FIELD_LEN*(numRows*2  + rowId);
+            int col1_val = this.columns.getInt(col1_offset);
+            if (col1_val > threshold1){
+                int col2_val = this.columns.getInt(col2_offset);
+                if (col2_val<threshold2){
+                    sum+=this.columns.getInt(ByteFormat.FIELD_LEN*rowId);
+                }
+            }
+        }
+        return sum;
     }
 
     /**
@@ -92,7 +108,16 @@ public class ColumnTable implements Table {
     @Override
     public long predicatedAllColumnsSum(int threshold) {
         // TODO: Implement this!
-        return 0;
+        long running_sum = 0;
+        for (int rowId = 0; rowId<numRows; rowId++){
+            if (this.columns.getInt(ByteFormat.FIELD_LEN*rowId)> threshold){
+                for (int colId = 0; colId<numCols; colId++){
+                    running_sum+=this.columns.getInt
+                            (ByteFormat.FIELD_LEN*(numRows*colId + rowId));
+                }
+            }
+        }
+        return running_sum;
     }
 
     /**
@@ -104,6 +129,15 @@ public class ColumnTable implements Table {
     @Override
     public int predicatedUpdate(int threshold) {
         // TODO: Implement this!
-        return 0;
+        int updatedRows = 0;
+        for (int rowId = 0; rowId<numRows; rowId++) {
+            if (this.columns.getInt(ByteFormat.FIELD_LEN * rowId) < threshold) {
+                updatedRows += 1;
+                int col3_val = this.columns.getInt(ByteFormat.FIELD_LEN * (3*numRows + rowId));
+                int col2_val = this.columns.getInt(ByteFormat.FIELD_LEN * (2*numRows + rowId));
+                this.columns.putInt(ByteFormat.FIELD_LEN * (3*numRows + rowId), col3_val + col2_val);
+            }
+        }
+        return updatedRows;
     }
 }
