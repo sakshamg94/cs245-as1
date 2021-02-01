@@ -86,7 +86,7 @@ public class ColumnTable implements Table {
         // TODO: Implement this!
         long sum = 0;
         for (int rowId = 0; rowId<numRows; rowId++){
-            int col1_offset = ByteFormat.FIELD_LEN*(numRows*1  + rowId);
+            int col1_offset = ByteFormat.FIELD_LEN*(numRows  + rowId);
             int col2_offset = ByteFormat.FIELD_LEN*(numRows*2  + rowId);
             int col1_val = this.columns.getInt(col1_offset);
             if (col1_val > threshold1){
@@ -108,16 +108,16 @@ public class ColumnTable implements Table {
     @Override
     public long predicatedAllColumnsSum(int threshold) {
         // TODO: Implement this!
-        long running_sum = 0;
+        long runningSum = 0;
         for (int rowId = 0; rowId<numRows; rowId++){
             if (this.columns.getInt(ByteFormat.FIELD_LEN*rowId)> threshold){
                 for (int colId = 0; colId<numCols; colId++){
-                    running_sum+=this.columns.getInt
+                    runningSum+=this.columns.getInt
                             (ByteFormat.FIELD_LEN*(numRows*colId + rowId));
                 }
             }
         }
-        return running_sum;
+        return runningSum;
     }
 
     /**

@@ -52,8 +52,7 @@ public class RowTable implements Table {
 //            throw new IOException("invalid row or col Id");
 //        } else{
         int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
-        int value = this.rows.getInt(offset);
-        return value;
+        return this.rows.getInt(offset);
 //        }
     }
 
@@ -117,17 +116,17 @@ public class RowTable implements Table {
     @Override
     public long predicatedAllColumnsSum(int threshold) {
         // TODO: Implement this!
-        long running_sum = 0;
+        long runningSum = 0;
         for (int rowId = 0; rowId < numRows; rowId++){
             int row_offset = ByteFormat.FIELD_LEN*rowId*numCols;
             int col0_val = this.rows.getInt(row_offset);
             if (col0_val > threshold){
                 for (int colId = 0; colId < numCols; colId++){
-                    running_sum += this.rows.getInt(row_offset + ByteFormat.FIELD_LEN*colId);
+                    runningSum += this.rows.getInt(row_offset + ByteFormat.FIELD_LEN*colId);
                 }
             }
         }
-        return running_sum;
+        return runningSum;
     }
 
     /**
