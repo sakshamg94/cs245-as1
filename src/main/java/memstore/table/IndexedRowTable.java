@@ -53,6 +53,7 @@ public class IndexedRowTable implements Table {
     @Override
     public void load(DataLoader loader) throws IOException {
         // TODO: Implement this!
+        this.index = new TreeMap<Integer, IntArrayList>();
         this.numCols = loader.getNumCols();
         List<ByteBuffer> rows = loader.getRows();
         numRows = rows.size();
@@ -141,6 +142,9 @@ public class IndexedRowTable implements Table {
         long required_sum = 0;
 
         if (this.indexColumn == 1){ // col1 is the indexed col
+            if (this.index.higherKey(threshold1) == null){
+                return required_sum;
+            }
             int k = this.index.higherKey(threshold1);
             // what if above returns a "null" key to int object
             while(this.index.containsKey(k)){
@@ -152,10 +156,16 @@ public class IndexedRowTable implements Table {
                         required_sum+=col2_value;
                     }
                 }
+                if (this.index.higherKey(k) == null){
+                    break;
+                }
                 k = this.index.higherKey(k);
             }
 
         }else if (this.indexColumn ==2){ // col2 is the indexed column
+            if (this.index.lowerKey(threshold2) == null){
+                return required_sum;
+            }
             int k = this.index.lowerKey(threshold2);
             // what if above returns a "null" key to int object
             while(this.index.containsKey(k)){
@@ -166,6 +176,9 @@ public class IndexedRowTable implements Table {
                     if (col1_value > threshold1){
                         required_sum+=col1_value;
                     }
+                }
+                if (this.index.lowerKey(k) == null){
+                    break;
                 }
                 k = this.index.lowerKey(k);
             }
@@ -197,6 +210,9 @@ public class IndexedRowTable implements Table {
         long runningSum = 0;
 
         if (this.indexColumn == 0) { // col0 is the indexed col
+            if (this.index.higherKey(threshold) == null){
+                return runningSum;
+            }
             int k = this.index.higherKey(threshold);
             // what if above returns a "null" key to int object
             while (this.index.containsKey(k)) {
@@ -207,6 +223,9 @@ public class IndexedRowTable implements Table {
                         int col_value = this.rows.getInt(offset);
                         runningSum += col_value;
                     }
+                }
+                if (this.index.higherKey(k) == null){
+                    break;
                 }
                 k = this.index.higherKey(k);
             }
@@ -237,6 +256,9 @@ public class IndexedRowTable implements Table {
         int updatedRows = 0;
 
         if (this.indexColumn == 0){
+            if (this.index.lowerKey(threshold) == null){
+                return  updatedRows;
+            }
             int k = this.index.lowerKey(threshold);
             // what if above returns a "null" key to int object
             while (this.index.containsKey(k)) {
@@ -248,6 +270,9 @@ public class IndexedRowTable implements Table {
                     int col3_value = this.rows.getInt(col3_offset);
                     int col2_value = this.rows.getInt(col2_offset);
                     this.rows.putInt(col3_offset, col3_value+col2_value);
+                }
+                if (this.index.lowerKey(k) == null){
+                    break;
                 }
                 k = this.index.lowerKey(k);
             }
