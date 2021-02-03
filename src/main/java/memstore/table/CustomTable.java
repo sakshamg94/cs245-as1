@@ -96,14 +96,19 @@ public class CustomTable implements Table {
                 this.rows.putInt(offset, col_value);
 
                 if(colId==0){
-                    this.col0.putInt(offset, col_value);
+                    this.col0.putInt(ByteFormat.FIELD_LEN *rowId, col_value);
                     addValIndex0(rowId, col_value);
                 }
 
                 if (colId==1){
                     int col2_value = curRow.getInt(ByteFormat.FIELD_LEN * colId*2);
-                    int col0_value = this.col0.getInt(rowId);
+                    int col0_value = this.col0.getInt(ByteFormat.FIELD_LEN *rowId);
                     addValMultiIndex(col0_value, col_value, col2_value);
+                }
+
+                if (colId == 3){
+                    int col2_value = curRow.getInt(ByteFormat.FIELD_LEN * colId*2);
+                    this.col3PlusCol2.putInt(ByteFormat.FIELD_LEN*rowId, col_value + col2_value);
                 }
             }
         }
@@ -115,7 +120,9 @@ public class CustomTable implements Table {
     @Override
     public int getIntField(int rowId, int colId) {
         // TODO: Implement this!
-        return 0;
+        int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
+        int value = this.rows.getInt(offset);
+        return value;
     }
 
     /**
@@ -124,6 +131,18 @@ public class CustomTable implements Table {
     @Override
     public void putIntField(int rowId, int colId, int field) {
         // TODO: Implement this!
+        /**
+         * if colId ==0
+         *      update the index0 by removing old linkage and forming a new one
+         * if colid==1
+         *      figre this rowId's col0 and col2 value
+         *      go to the col1 key, find subtree with col2 entry of this row and reduce the sum by col0 value
+         *      use helper function to add the col0, NEW col1, col2 values to the multiindex
+         * if colid ==2
+         *      for all keys in the multiindex that contain subtrees with the old col2 value as key, reduce the sum value by col0 amount
+         *          use helper function to add the col0, col1, NEW col2 values to the multiindex
+         * update the table
+         */
     }
 
     /**
@@ -160,7 +179,28 @@ public class CustomTable implements Table {
     @Override
     public long predicatedAllColumnsSum(int threshold) {
         // TODO: Implement this!
-        return 0;
+        long runningSum = 0;
+
+        if (this.indexCol0.higherKey(threshold) == null){
+            return runningSum;
+        }
+        int k = this.indexCol0.higherKey(threshold);
+
+        while (this.indexCol0.containsKey(k)) {
+            IntArrayList row_list = this.indexCol0.get(k);
+            for (int rowId : row_list) {
+                for (int colId = 0; colId < numCols; colId++) {
+                    int offset = ByteFormat.FIELD_LEN * (rowId * numCols + colId);
+                    int col_value = this.rows.getInt(offset);
+                    runningSum += col_value;
+                }
+            }
+            if (this.indexCol0.higherKey(k) == null){
+                break;
+            }
+            k = this.indexCol0.higherKey(k);
+        }
+        return runningSum;
     }
 
     /**
@@ -172,7 +212,25 @@ public class CustomTable implements Table {
     @Override
     public int predicatedUpdate(int threshold) {
         // TODO: Implement this!
-        return 0;
-    }
+        int updatedRows = 0;
 
+        if (this.indexCol0.lowerKey(threshold) == null) {
+            return updatedRows;
+        }
+        int k = this.indexCol0.lowerKey(threshold);
+
+        while (this.indexCol0.containsKey(k)) {
+            IntArrayList row_list = this.indexCol0.get(k);
+            for (int rowId : row_list) {
+                updatedRows += 1;
+                int col3_offset = ByteFormat.FIELD_LEN * (rowId * numCols + 3);
+                this.rows.putInt(col3_offset, this.col3PlusCol2.getInt(ByteFormat.FIELD_LEN * rowId));
+            }
+            if (this.indexCol0.lowerKey(k) == null) {
+                break;
+            }
+            k = this.indexCol0.lowerKey(k);
+        }
+        return updatedRows;
+    }
 }

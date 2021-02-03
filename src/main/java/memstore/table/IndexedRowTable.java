@@ -148,7 +148,7 @@ public class IndexedRowTable implements Table {
                 return required_sum;
             }
             int k = this.index.higherKey(threshold1);
-            // what if above returns a "null" key to int object
+
             while(this.index.containsKey(k)){
                 IntArrayList row_list = this.index.get(k);
                 for(int rowId : row_list){
@@ -169,7 +169,7 @@ public class IndexedRowTable implements Table {
                 return required_sum;
             }
             int k = this.index.lowerKey(threshold2);
-            // what if above returns a "null" key to int object
+
             while(this.index.containsKey(k)){
                 IntArrayList row_list = this.index.get(k);
                 for(int rowId : row_list){
@@ -216,7 +216,7 @@ public class IndexedRowTable implements Table {
                 return runningSum;
             }
             int k = this.index.higherKey(threshold);
-            // what if above returns a "null" key to int object
+
             while (this.index.containsKey(k)) {
                 IntArrayList row_list = this.index.get(k);
                 for (int rowId : row_list) {
@@ -262,7 +262,7 @@ public class IndexedRowTable implements Table {
                 return  updatedRows;
             }
             int k = this.index.lowerKey(threshold);
-            // what if above returns a "null" key to int object
+
             while (this.index.containsKey(k)) {
                 IntArrayList row_list = this.index.get(k);
                 for (int rowId : row_list) {
