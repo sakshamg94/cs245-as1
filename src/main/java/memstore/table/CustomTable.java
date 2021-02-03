@@ -7,6 +7,7 @@ import memstore.data.DataLoader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.HashSet;
 import java.util.List;
 //import java.util.Map;
 import java.util.TreeMap;
@@ -18,7 +19,11 @@ public class CustomTable implements Table {
     int numCols;
     int numRows;
     private TreeMap<Integer, IntArrayList> indexCol0;
-    private TreeMap<Integer, TreeMap<Integer, Long>> multiIndexCol12SumCol0;
+    private TreeMap<Integer, IntArrayList> indexCol1;
+    private TreeMap<Integer, IntArrayList> indexCol2;
+
+    private long sumCol0 = 0;
+
     private ByteBuffer rows;
     private ByteBuffer col0;
 
@@ -45,35 +50,40 @@ public class CustomTable implements Table {
 
     /**
      * HELPER METHOD
-     * Adds col0 value to the sum of col0's corresponding to a particular tuple of col1 and col2 values
+     * Adds an int value (row id) to the treemap with key k.
      *
-     * @param col0_value is the col0 value for this row
-     * @param col1_value  is the col1 value for that row : primary key for the multiindex
-     * @param col2_value is the col2 value for that row : secondary key for the multiindex
+     * @param val is the row id to be added corresponding to col0 value
+     * @param k   is the col0 value which serves as the key for this index
      */
-    public void addValMultiIndex(int col0_value, int col1_value, int col2_value) {
-        // col1_value; primary key for the multiindex
-        TreeMap<Integer, Long> correspond_col2_Values;
-
-        if (!this.multiIndexCol12SumCol0.containsKey(col1_value)) {
-            correspond_col2_Values = new TreeMap<>();
-            correspond_col2_Values.put(col2_value, (long)col0_value);
-
+    public void addValIndex1(int val, int k) {
+        IntArrayList correspond_rows;
+        if (!this.indexCol1.containsKey(k)) {
+            correspond_rows = new IntArrayList();
         } else {
-            correspond_col2_Values = this.multiIndexCol12SumCol0.get(col1_value);
-            long col0SumSoFar;
-            if (!correspond_col2_Values.containsKey(col2_value)) {
-                col0SumSoFar = col0_value;
-            } else {
-                col0SumSoFar = correspond_col2_Values.get(col2_value);
-                col0SumSoFar += col0_value;
-            }
-            correspond_col2_Values.put(col2_value, col0SumSoFar);
-            // did the change propagate to the treemap or just
-            // locally to the intArrayList ? YES CHECKED
+            correspond_rows = this.indexCol1.get(k);
         }
-        this.multiIndexCol12SumCol0.put(col1_value, correspond_col2_Values);
+        correspond_rows.add(val);
+        this.indexCol1.put(k, correspond_rows);
     }
+
+    /**
+     * HELPER METHOD
+     * Adds an int value (row id) to the treemap with key k.
+     *
+     * @param val is the row id to be added corresponding to col0 value
+     * @param k   is the col0 value which serves as the key for this index
+     */
+    public void addValIndex2(int val, int k) {
+        IntArrayList correspond_rows;
+        if (!this.indexCol2.containsKey(k)) {
+            correspond_rows = new IntArrayList();
+        } else {
+            correspond_rows = this.indexCol2.get(k);
+        }
+        correspond_rows.add(val);
+        this.indexCol2.put(k, correspond_rows);
+    }
+
 
     /**
      * Loads data into the table through passed-in data loader. Is not timed.
@@ -85,7 +95,8 @@ public class CustomTable implements Table {
     public void load(DataLoader loader) throws IOException {
         // TODO: Implement this!
         this.indexCol0 = new TreeMap<>();
-        this.multiIndexCol12SumCol0 = new TreeMap<>();
+        this.indexCol1 = new TreeMap<>();
+        this.indexCol2 = new TreeMap<>();
 
         this.numCols = loader.getNumCols();
         List<ByteBuffer> rows = loader.getRows();
@@ -96,9 +107,11 @@ public class CustomTable implements Table {
 
         for (int rowId = 0; rowId < numRows; rowId++) {
             ByteBuffer curRow = rows.get(rowId);
+            long running_sum = 0;
             for (int colId = 0; colId < numCols; colId++) {
                 int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
                 int col_value = curRow.getInt(ByteFormat.FIELD_LEN * colId);
+                running_sum+=col_value;
 
                 // put the value in the table
                 this.rows.putInt(offset, col_value);
@@ -107,11 +120,13 @@ public class CustomTable implements Table {
                 if (colId == 0) {
                     this.col0.putInt(ByteFormat.FIELD_LEN * rowId, col_value);
                     addValIndex0(rowId, col_value);
+                    this.sumCol0+=col_value;
 
-                } else if (colId == 2) {
-                    int col1_value = curRow.getInt(ByteFormat.FIELD_LEN);
-                    int col0_value = this.col0.getInt(ByteFormat.FIELD_LEN * rowId);
-                    addValMultiIndex(col0_value, col1_value, col_value);
+                } else if (colId == 1) {
+                    addValIndex1(rowId, col_value);
+
+                } else if(colId==2){
+                    addValIndex2(rowId, col_value);
                 }
 
                 else{}
@@ -125,6 +140,9 @@ public class CustomTable implements Table {
     @Override
     public int getIntField(int rowId, int colId) {
         // TODO: Implement this!
+        if (colId==0){
+            return this.col0.getInt(ByteFormat.FIELD_LEN*rowId);
+        }
         int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
         return this.rows.getInt(offset);
     }
@@ -136,26 +154,17 @@ public class CustomTable implements Table {
     public void putIntField(int rowId, int colId, int field) {
         // TODO: Implement this!
         /**
-         * if colId ==0
-         *      update the index0 by removing old linkage and forming a new one
-         * if colid==1
-         *      figre this rowId's col0 and col2 value
-         *      go to the col1 key, find subtree with col2 entry of this row and reduce the sum by col0 value
-         *      use helper function to add the col0, NEW col1, col2 values to the multiindex
-         * if colid ==2
-         *      for multiindex with key as col1 old value that contain subtree with the old col2 value as key,
-         *          reduce the sum value by col0 amount
-         *          use helper function to add the col0, col1, NEW col2 values to the multiindex
+         * if colId ==0 or 1 or 2
+         *      update the index0 by removing old linkage and forming a new one,
+         *      must also change value at col0 in colid==0
+         *
          * else {}
          * update the table
          */
         int row_offset = ByteFormat.FIELD_LEN * rowId * numCols;
 
-        int col1_original_val = this.getIntField(rowId, 1);
-        int col2_original_val = this.getIntField(rowId, 2);
-        int col0_original_val = this.getIntField(rowId, 0);
-
         if (colId == 0) {
+            int col0_original_val = this.getIntField(rowId, 0);
             // remove rowId from old value's IntArrayList in index
             IntArrayList old_row_list = this.indexCol0.get(col0_original_val);
             old_row_list.rem(rowId);
@@ -164,20 +173,35 @@ public class CustomTable implements Table {
             // add rowId to new value's IntArrayList in index
             this.addValIndex0(rowId, field);
 
-        } else if (colId == 1 || colId == 2) {
-            // 1
-            TreeMap<Integer, Long> correspond = this.multiIndexCol12SumCol0.get(col1_original_val);
-            long old_sum = correspond.get(col2_original_val);
-            correspond.put(col2_original_val, old_sum - col0_original_val);
-            this.multiIndexCol12SumCol0.put(col1_original_val, correspond);
-            // 2
-            if (colId ==1) {
-                addValMultiIndex(col0_original_val, field, col2_original_val);
-            } else{
-                addValMultiIndex(col0_original_val, col1_original_val, field);
-            }
+            // update in col0 buffer
+            this.col0.putInt(ByteFormat.FIELD_LEN*rowId);
 
-        } else{
+            // update the pre computed sum
+            this.sumCol0-=col0_original_val;
+            this.sumCol0+=field;
+
+
+        } else if (colId == 1) {
+            // 1
+            int col1_original_val = this.getIntField(rowId, 1);
+            // remove rowId from old value's IntArrayList in index
+            IntArrayList old_row_list = this.indexCol1.get(col1_original_val);
+            old_row_list.rem(rowId);
+            this.indexCol1.put(col1_original_val, old_row_list);
+
+            // add rowId to new value's IntArrayList in index
+            this.addValIndex1(rowId, field);
+
+        } else if (colId==2){
+            // 1
+            int col2_original_val = this.getIntField(rowId, 2);
+            // remove rowId from old value's IntArrayList in index
+            IntArrayList old_row_list = this.indexCol2.get(col2_original_val);
+            old_row_list.rem(rowId);
+            this.indexCol2.put(col2_original_val, old_row_list);
+
+            // add rowId to new value's IntArrayList in index
+            this.addValIndex2(rowId, field);
         }
         this.rows.putInt(row_offset +ByteFormat.FIELD_LEN*colId,field);
     }
@@ -192,11 +216,7 @@ public class CustomTable implements Table {
     @Override
     public long columnSum() {
         // TODO: Implement this!
-        long result = 0;
-        for(int rowId= 0; rowId<numRows; rowId++){
-            result += getIntField(rowId,0);
-        }
-        return result;
+        return this.sumCol0;
 
     }
 
@@ -211,38 +231,53 @@ public class CustomTable implements Table {
     public long predicatedColumnSum(int threshold1, int threshold2) {
         // TODO: Implement this!
         /**
-         * 1. search multiindex for all keys > threshold1
-         *      for each subtree where the col2_value (key) is < thresold2
-         *          add the value to the running sum
+         * Set together all rows that satisfy col1> threshold1
+         * Set together all rows that satisfy col2< threshold2
+         * iterate over the smaller of the 2 sets by checking for presence in the larger one O(1)
+         *      sum col0 entries into running sum
          */
         long running_sum = 0;
 
-        if (this.multiIndexCol12SumCol0.higherKey(threshold1) == null){
+        // get rows for first col
+        if (this.indexCol1.higherKey(threshold1) == null || this.indexCol2.lowerKey(threshold2)==null){
             return running_sum;
         }
-        int k = this.multiIndexCol12SumCol0.higherKey(threshold1);
+        int k = this.indexCol1.higherKey(threshold1);
 
-        while(this.multiIndexCol12SumCol0.containsKey(k)){
+        HashSet<Integer> col1_satisfied = new HashSet<>();
 
-            TreeMap<Integer, Long> subtree = this.multiIndexCol12SumCol0.get(k);
-            if (subtree.lowerKey(threshold2) == null){
-                } else {
-                int col2_key = subtree.lowerKey(threshold2);
+        while (this.indexCol1.containsKey(k)) {
+            IntArrayList row_list = this.indexCol1.get(k);
+            col1_satisfied.addAll(row_list);
 
-                while (subtree.containsKey(col2_key)) {
-                    running_sum += subtree.get(col2_key);
-
-                    if (subtree.lowerKey(col2_key) == null) {
-                        break;
-                    }
-                    col2_key = subtree.lowerKey(k);
-                }
-            }
-            if (this.multiIndexCol12SumCol0.higherKey(k)==null){
+            if (this.indexCol1.higherKey(k) == null) {
                 break;
             }
-            k = this.multiIndexCol12SumCol0.higherKey(k);
+            k = this.indexCol1.higherKey(k);
         }
+         // get rows for second col
+        k = this.indexCol2.lowerKey(threshold2);
+
+        HashSet<Integer> col2_satisfied = new HashSet<>();
+
+        while (this.indexCol2.containsKey(k)) {
+            IntArrayList row_list = this.indexCol2.get(k);
+            col2_satisfied.addAll(row_list);
+
+            if (this.indexCol2.lowerKey(k) == null) {
+                break;
+            }
+            k = this.indexCol2.lowerKey(k);
+        }
+        // only contain the intersection of rows
+        col1_satisfied.retainAll(col2_satisfied);
+
+        // calculate the sum
+        for (Integer rowId : col1_satisfied){
+            running_sum+=this.col0.getInt(ByteFormat.FIELD_LEN *rowId);
+        }
+
+
         return running_sum;
     }
 
