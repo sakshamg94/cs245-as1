@@ -171,7 +171,7 @@ public class CustomTable implements Table {
             this.addValIndex0(rowId, field);
 
             // update in col0 buffer
-            this.col0.putInt(ByteFormat.FIELD_LEN*rowId);
+            this.col0.putInt(ByteFormat.FIELD_LEN*rowId, field);
 
             // update the pre computed sum
             this.sumCol0-=col0_original_val;

@@ -5,31 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d2cbcc8b-4aa4-44d4-a35f-d66aa5c958f2" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/memstore/table/CustomTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/memstore/table/CustomTable.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/benchmarks.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/benchmarks.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/META-INF/BenchmarkList" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/META-INF/BenchmarkList" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/memstore/table/CustomTable.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/memstore/table/CustomTable.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-archiver/pom.properties" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-archiver/pom.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/memstore-bench-1.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/memstore-bench-1.0.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.grader.GradedTestResultTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.grader.GradedTestResultTest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.CSVLoaderTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.CSVLoaderTest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.ColumnSumTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.ColumnSumTest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.CustomTableTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.CustomTableTest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.PredicatedAllColumnsSumTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.PredicatedAllColumnsSumTest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.PredicatedColumnSumTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.PredicatedColumnSumTest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.PredicatedUpdateTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.PredicatedUpdateTest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.PutGetTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.PutGetTest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.RandomizedLoaderTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.RandomizedLoaderTest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.TableLoadTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.TableLoadTest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.grader.GradedTestResultTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.grader.GradedTestResultTest.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.CSVLoaderTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.CSVLoaderTest.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.ColumnSumTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.ColumnSumTest.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.CustomTableTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.CustomTableTest.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.PredicatedAllColumnsSumTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.PredicatedAllColumnsSumTest.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.PredicatedColumnSumTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.PredicatedColumnSumTest.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.PredicatedUpdateTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.PredicatedUpdateTest.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.RandomizedLoaderTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.RandomizedLoaderTest.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.TableLoadTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.TableLoadTest.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
