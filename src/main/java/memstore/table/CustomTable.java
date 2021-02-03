@@ -24,6 +24,9 @@ public class CustomTable implements Table {
 
     private long sumCol0 = 0;
 
+    private ByteBuffer allColsSum;
+    public static int LONG_FIELD_LEN  = 8;
+    
     private ByteBuffer rows;
     private ByteBuffer col0;
 
@@ -104,6 +107,7 @@ public class CustomTable implements Table {
 
         this.rows = ByteBuffer.allocate(ByteFormat.FIELD_LEN * numRows * numCols);
         this.col0 = ByteBuffer.allocate(ByteFormat.FIELD_LEN * numRows);
+        this.allColsSum = ByteBuffer.allocate(LONG_FIELD_LEN * numRows);
 
         for (int rowId = 0; rowId < numRows; rowId++) {
             ByteBuffer curRow = rows.get(rowId);
@@ -128,9 +132,8 @@ public class CustomTable implements Table {
                 } else if(colId==2){
                     addValIndex2(rowId, col_value);
                 }
-
-                else{}
             }
+            this.allColsSum.putLong(LONG_FIELD_LEN*rowId, running_sum);
         }
     }
 
@@ -156,7 +159,9 @@ public class CustomTable implements Table {
          *      must also change value at col0 in colid==0
          *
          * else {}
+         *
          * update the table
+         * make sure to update the running allColsSum in the buffer for this row
          */
         int row_offset = ByteFormat.FIELD_LEN * rowId * numCols;
 
@@ -200,7 +205,11 @@ public class CustomTable implements Table {
             // add rowId to new value's IntArrayList in index
             this.addValIndex2(rowId, field);
         }
+        int old_value = this.rows.getInt(row_offset +ByteFormat.FIELD_LEN*colId);
         this.rows.putInt(row_offset +ByteFormat.FIELD_LEN*colId,field);
+
+        long old_allColsSum = this.allColsSum.getLong(LONG_FIELD_LEN*rowId);
+        this.allColsSum.putLong(LONG_FIELD_LEN*rowId, old_allColsSum - old_value + field);
     }
 
 
@@ -297,10 +306,7 @@ public class CustomTable implements Table {
         while (this.indexCol0.containsKey(k)) {
             IntArrayList row_list = this.indexCol0.get(k);
             for (int rowId : row_list) {
-                for (int colId = 0; colId < numCols; colId++) {
-                    int col_value = getIntField(rowId, colId);
-                    runningSum += col_value;
-                }
+                    runningSum += this.allColsSum.getLong(LONG_FIELD_LEN*rowId);
             }
             if (this.indexCol0.higherKey(k) == null){
                 break;
