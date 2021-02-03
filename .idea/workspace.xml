@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="d2cbcc8b-4aa4-44d4-a35f-d66aa5c958f2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/memstore/table/CustomTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/memstore/table/CustomTable.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/memstore/table/IndexedRowTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/memstore/table/IndexedRowTable.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

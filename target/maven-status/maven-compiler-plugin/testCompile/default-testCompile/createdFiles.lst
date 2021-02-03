@@ -1,0 +1,10 @@
+memstore\grader\GradedTestResultTest.class
+memstore\table\PredicatedAllColumnsSumTest.class
+memstore\table\CSVLoaderTest.class
+memstore\table\PredicatedColumnSumTest.class
+memstore\table\RandomizedLoaderTest.class
+memstore\table\TableLoadTest.class
+memstore\table\ColumnSumTest.class
+memstore\table\PredicatedUpdateTest.class
+memstore\table\CustomTableTest.class
+memstore\table\PutGetTest.class

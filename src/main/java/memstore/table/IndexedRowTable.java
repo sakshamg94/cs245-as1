@@ -31,6 +31,8 @@ public class IndexedRowTable implements Table {
 
     /** HELPER METHOD
      * Adds an int value (row id) to the treemap with key k.
+     * @param val is the row id to be added corresponding to col0 value
+     * @param k is the col0 value which serves as the key for this index
      */
     public void addVal(int val, int k) {
         if (!this.index.containsKey(k)) {
