@@ -140,9 +140,6 @@ public class CustomTable implements Table {
     @Override
     public int getIntField(int rowId, int colId) {
         // TODO: Implement this!
-        if (colId==0){
-            return this.col0.getInt(ByteFormat.FIELD_LEN*rowId);
-        }
         int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
         return this.rows.getInt(offset);
     }
