@@ -194,7 +194,7 @@ public class CustomTable implements Table {
         // TODO: Implement this!
         long result = 0;
         for(int rowId= 0; rowId<numRows; rowId++){
-            result += this.col0.getInt(ByteFormat.FIELD_LEN*rowId);
+            result += getIntField(rowId,0);
         }
         return result;
 
