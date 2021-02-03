@@ -20,7 +20,7 @@ public class CustomTable implements Table {
     private TreeMap<Integer, IntArrayList> indexCol0;
     private TreeMap<Integer, TreeMap<Integer, Long>> multiIndexCol12SumCol0;
     private ByteBuffer rows;
-    private ByteBuffer col3PlusCol2;
+//    private ByteBuffer col3PlusCol2;
     private ByteBuffer col0;
 
     public CustomTable() {
@@ -93,7 +93,7 @@ public class CustomTable implements Table {
         numRows = rows.size();
 
         this.rows = ByteBuffer.allocate(ByteFormat.FIELD_LEN * numRows * numCols);
-        this.col3PlusCol2 = ByteBuffer.allocate(ByteFormat.FIELD_LEN * numRows);
+//        this.col3PlusCol2 = ByteBuffer.allocate(ByteFormat.FIELD_LEN * numRows);
         this.col0 = ByteBuffer.allocate(ByteFormat.FIELD_LEN * numRows);
 
         for (int rowId = 0; rowId < numRows; rowId++) {
@@ -115,11 +115,11 @@ public class CustomTable implements Table {
                     int col0_value = this.col0.getInt(ByteFormat.FIELD_LEN * rowId);
                     addValMultiIndex(col0_value, col1_value, col_value);
 
-                }else if (colId == 3) {
-                    int col2_value = curRow.getInt(ByteFormat.FIELD_LEN * 2);
-                    this.col3PlusCol2.putInt(ByteFormat.FIELD_LEN * rowId, col_value + col2_value);
+//                }else if (colId == 3) {
+//                    int col2_value = curRow.getInt(ByteFormat.FIELD_LEN * 2);
+//                    this.col3PlusCol2.putInt(ByteFormat.FIELD_LEN * rowId, col_value + col2_value);
+//                }
                 }
-
                 else{}
             }
         }
@@ -272,8 +272,7 @@ public class CustomTable implements Table {
             IntArrayList row_list = this.indexCol0.get(k);
             for (int rowId : row_list) {
                 for (int colId = 0; colId < numCols; colId++) {
-                    int offset = ByteFormat.FIELD_LEN * (rowId * numCols + colId);
-                    int col_value = this.rows.getInt(offset);
+                    int col_value = getIntField(rowId, colId);
                     runningSum += col_value;
                 }
             }
@@ -305,7 +304,8 @@ public class CustomTable implements Table {
             IntArrayList row_list = this.indexCol0.get(k);
             for (int rowId : row_list) {
                 updatedRows += 1;
-                putIntField(rowId,3, this.col3PlusCol2.getInt(ByteFormat.FIELD_LEN * rowId));
+                putIntField(rowId,3, getIntField(rowId,3) + getIntField(rowId,2));
+//                this.col3PlusCol2.putInt(ByteFormat.FIELD_LEN * rowId, )
             }
             if (this.indexCol0.lowerKey(k) == null) {
                 break;

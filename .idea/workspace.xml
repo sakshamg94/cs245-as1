@@ -21,13 +21,9 @@
       <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.PutGetTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.PutGetTest.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.RandomizedLoaderTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.RandomizedLoaderTest.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.TableLoadTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-memstore.table.TableLoadTest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.grader.GradedTestResultTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.grader.GradedTestResultTest.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.CSVLoaderTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.CSVLoaderTest.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.ColumnSumTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.ColumnSumTest.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.CustomTableTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.CustomTableTest.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.PredicatedAllColumnsSumTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.PredicatedAllColumnsSumTest.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.PredicatedUpdateTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.PredicatedUpdateTest.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.PutGetTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.PutGetTest.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/surefire-reports/memstore.table.TableLoadTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/memstore.table.TableLoadTest.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

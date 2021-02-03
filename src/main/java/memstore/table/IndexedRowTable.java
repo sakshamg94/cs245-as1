@@ -283,6 +283,7 @@ public class IndexedRowTable implements Table {
                     // remove the rowId in the index with key as the col3's old value
                     IntArrayList old_row_list = this.index.get(col3_val);
                     old_row_list.rem(rowId);
+                    this.index.put(col3_val, old_row_list);
 
                     // get the col2 value for this row
                     int col2_val = getIntField(rowId, 2);
