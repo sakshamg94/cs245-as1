@@ -35,15 +35,14 @@ public class IndexedRowTable implements Table {
      * @param k is the col0 value which serves as the key for this index
      */
     public void addVal(int val, int k) {
+        IntArrayList correspond_rows;
         if (!this.index.containsKey(k)) {
-            IntArrayList correspond_rows = new IntArrayList();
-            correspond_rows.add(val);
-            this.index.put(k, correspond_rows);
+            correspond_rows = new IntArrayList();
         } else {
-            this.index.get(k).add(val);
-            // did the change propagate to the treemap or just
-            // locally to the intArrayList ? CHECK
+            correspond_rows = this.index.get(k);
         }
+        correspond_rows.add(val);
+        this.index.put(k, correspond_rows);
     }
 
     /**
@@ -81,8 +80,7 @@ public class IndexedRowTable implements Table {
     public int getIntField(int rowId, int colId) {
         // TODO: Implement this!
         int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
-        int value = this.rows.getInt(offset);
-        return value;
+        return this.rows.getInt(offset);
     }
 
     /**
@@ -97,6 +95,8 @@ public class IndexedRowTable implements Table {
             int old_value = getIntField(rowId, colId);
             IntArrayList old_row_list = this.index.get(old_value);
             old_row_list.rem(rowId);
+            this.index.put(old_value, old_row_list);
+
             // add rowId to new value's IntArrayList in index
             addVal(rowId, field);
         }

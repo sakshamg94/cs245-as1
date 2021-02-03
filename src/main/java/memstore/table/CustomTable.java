@@ -34,15 +34,14 @@ public class CustomTable implements Table {
      * @param k   is the col0 value which serves as the key for this index
      */
     public void addValIndex0(int val, int k) {
+        IntArrayList correspond_rows;
         if (!this.indexCol0.containsKey(k)) {
-            IntArrayList correspond_rows = new IntArrayList();
-            correspond_rows.add(val);
-            this.indexCol0.put(k, correspond_rows);
+            correspond_rows = new IntArrayList();
         } else {
-            this.indexCol0.get(k).add(val);
-            // did the change propagate to the treemap or just
-            // locally to the intArrayList ? CHECK
+            correspond_rows = this.indexCol0.get(k);
         }
+        correspond_rows.add(val);
+        this.indexCol0.put(k, correspond_rows);
     }
 
     /**
@@ -50,17 +49,19 @@ public class CustomTable implements Table {
      * Adds col0 value to the sum of col0's corresponding to a particular tuple of col1 and col2 values
      *
      * @param col0_value is the col0 value for this row
-     * @param col_value  is the col1 value for that row : primary key for the multiindex
+     * @param col1_value  is the col1 value for that row : primary key for the multiindex
      * @param col2_value is the col2 value for that row : secondary key for the multiindex
      */
-    public void addValMultiIndex(int col0_value, int col_value, int col2_value) {
-        // col_value; primary key for the multiindex
+    public void addValMultiIndex(int col0_value, int col1_value, int col2_value) {
+        // col1_value; primary key for the multiindex
         TreeMap<Integer, Long> correspond_col2_Values;
-        if (!this.multiIndexCol12SumCol0.containsKey(col_value)) {
+
+        if (!this.multiIndexCol12SumCol0.containsKey(col1_value)) {
             correspond_col2_Values = new TreeMap<>();
-            correspond_col2_Values.put(col2_value, (long) col0_value);
+            correspond_col2_Values.put(col2_value, (long)col0_value);
+
         } else {
-            correspond_col2_Values = this.multiIndexCol12SumCol0.get(col_value);
+            correspond_col2_Values = this.multiIndexCol12SumCol0.get(col1_value);
             long col0SumSoFar;
             if (!correspond_col2_Values.containsKey(col2_value)) {
                 col0SumSoFar = col0_value;
@@ -70,9 +71,9 @@ public class CustomTable implements Table {
             }
             correspond_col2_Values.put(col2_value, col0SumSoFar);
             // did the change propagate to the treemap or just
-            // locally to the intArrayList ? CHECK
+            // locally to the intArrayList ? YES CHECKED
         }
-        this.multiIndexCol12SumCol0.put(col_value, correspond_col2_Values);
+        this.multiIndexCol12SumCol0.put(col1_value, correspond_col2_Values);
     }
 
     /**
@@ -100,23 +101,26 @@ public class CustomTable implements Table {
             for (int colId = 0; colId < numCols; colId++) {
                 int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
                 int col_value = curRow.getInt(ByteFormat.FIELD_LEN * colId);
+
+                // put the value in the table
                 this.rows.putInt(offset, col_value);
 
+                // check for any indices that need updates
                 if (colId == 0) {
                     this.col0.putInt(ByteFormat.FIELD_LEN * rowId, col_value);
                     addValIndex0(rowId, col_value);
-                }
 
-                if (colId == 1) {
-                    int col2_value = curRow.getInt(ByteFormat.FIELD_LEN * 2);
+                } else if (colId == 2) {
+                    int col1_value = curRow.getInt(ByteFormat.FIELD_LEN);
                     int col0_value = this.col0.getInt(ByteFormat.FIELD_LEN * rowId);
-                    addValMultiIndex(col0_value, col_value, col2_value);
-                }
+                    addValMultiIndex(col0_value, col1_value, col_value);
 
-                if (colId == 3) {
+                }else if (colId == 3) {
                     int col2_value = curRow.getInt(ByteFormat.FIELD_LEN * 2);
                     this.col3PlusCol2.putInt(ByteFormat.FIELD_LEN * rowId, col_value + col2_value);
                 }
+
+                else{}
             }
         }
     }
@@ -161,28 +165,25 @@ public class CustomTable implements Table {
             // remove rowId from old value's IntArrayList in index
             IntArrayList old_row_list = this.indexCol0.get(col0_original_val);
             old_row_list.rem(rowId);
+            this.indexCol0.put(col0_original_val, old_row_list);
+
             // add rowId to new value's IntArrayList in index
             this.addValIndex0(rowId, field);
 
-        } else if (colId == 1) {
+        } else if (colId == 1 || colId == 2) {
             // 1
             TreeMap<Integer, Long> correspond = this.multiIndexCol12SumCol0.get(col1_original_val);
             long old_sum = correspond.get(col2_original_val);
             correspond.put(col2_original_val, old_sum - col0_original_val);
             this.multiIndexCol12SumCol0.put(col1_original_val, correspond);
-            //2
-            addValMultiIndex(col0_original_val, field, col2_original_val);
-
-        } else if (colId == 2) {
-            // 1
-            TreeMap<Integer, Long> subTree = this.multiIndexCol12SumCol0.get(col1_original_val);
-            long sum = subTree.get(col2_original_val);
-            sum -= col0_original_val;
-            subTree.put(col2_original_val, sum);
             // 2
-            addValMultiIndex(col0_original_val, col1_original_val, field);
-        } else{
+            if (colId ==1) {
+                addValMultiIndex(col0_original_val, field, col2_original_val);
+            } else{
+                addValMultiIndex(col0_original_val, col1_original_val, field);
+            }
 
+        } else{
         }
         this.rows.putInt(row_offset +ByteFormat.FIELD_LEN*colId,field);
     }
