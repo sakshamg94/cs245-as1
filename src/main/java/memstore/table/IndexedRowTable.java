@@ -118,7 +118,7 @@ public class IndexedRowTable implements Table {
         long required_sum = 0;
         for (int rowId = 0; rowId < numRows; rowId++) {
             int offset = ByteFormat.FIELD_LEN*rowId*numCols;
-            required_sum+=this.rows.getInt(offset);
+            required_sum+=(long)this.rows.getInt(offset);
         }
         return required_sum;
     }
@@ -154,7 +154,7 @@ public class IndexedRowTable implements Table {
                 for(int rowId : row_list){
                     int col2_value = getIntField(rowId, 2);
                     if (col2_value < threshold2){
-                        required_sum+=col2_value;
+                        required_sum+=getIntField(rowId, 0);
                     }
                 }
                 if (this.index.higherKey(k) == null){
@@ -174,7 +174,7 @@ public class IndexedRowTable implements Table {
                 for(int rowId : row_list){
                     int col1_value = getIntField(rowId, 1);
                     if (col1_value > threshold1){
-                        required_sum+=col1_value;
+                        required_sum+=getIntField(rowId, 0);
                     }
                 }
                 if (this.index.lowerKey(k) == null){
@@ -280,16 +280,8 @@ public class IndexedRowTable implements Table {
                     updatedRows += 1;
 
                     int col3_val = getIntField(rowId, 3);
-                    // remove the rowId in the index with key as the col3's old value
-                    IntArrayList old_row_list = this.index.get(col3_val);
-                    old_row_list.rem(rowId);
-                    this.index.put(col3_val, old_row_list);
-
-                    // get the col2 value for this row
                     int col2_val = getIntField(rowId, 2);
 
-                    // insert the rowId in the index with key as the col3's new value
-                    // finally insert the new col3 value in the table as well
                     putIntField(rowId, 3, col3_val + col2_val);
                 }
             }
