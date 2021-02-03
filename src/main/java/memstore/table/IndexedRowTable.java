@@ -91,17 +91,17 @@ public class IndexedRowTable implements Table {
     @Override
     public void putIntField(int rowId, int colId, int field) {
         // TODO: Implement this!
-        int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
 
         if(colId==this.indexColumn) {
             // remove rowId from old value's IntArrayList in index
-            int old_value = this.rows.getInt(offset);
+            int old_value = getIntField(rowId, colId);
             IntArrayList old_row_list = this.index.get(old_value);
             old_row_list.rem(rowId);
             // add rowId to new value's IntArrayList in index
             addVal(rowId, field);
         }
         // finally add the value to the table
+        int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
         this.rows.putInt(offset, field);
 
     }
@@ -152,8 +152,7 @@ public class IndexedRowTable implements Table {
             while(this.index.containsKey(k)){
                 IntArrayList row_list = this.index.get(k);
                 for(int rowId : row_list){
-                    int col2_offset = ByteFormat.FIELD_LEN*(rowId*numCols + 2);
-                    int col2_value = this.rows.getInt(col2_offset);
+                    int col2_value = getIntField(rowId, 2);
                     if (col2_value < threshold2){
                         required_sum+=col2_value;
                     }
@@ -173,8 +172,7 @@ public class IndexedRowTable implements Table {
             while(this.index.containsKey(k)){
                 IntArrayList row_list = this.index.get(k);
                 for(int rowId : row_list){
-                    int col1_offset = ByteFormat.FIELD_LEN*(rowId*numCols + 2);
-                    int col1_value = this.rows.getInt(col1_offset);
+                    int col1_value = getIntField(rowId, 1);
                     if (col1_value > threshold1){
                         required_sum+=col1_value;
                     }
@@ -187,12 +185,11 @@ public class IndexedRowTable implements Table {
 
         }else{ // function same as that for rowTable.java
             for (int rowId = 0; rowId < numRows; rowId++) {
-                int row_offset = ByteFormat.FIELD_LEN * rowId * numCols;
-                int col1_val = this.rows.getInt(row_offset + ByteFormat.FIELD_LEN);
+                int col1_val = getIntField(rowId, 1);
                 if (col1_val > threshold1) {
-                    int col2_val = this.rows.getInt(row_offset + 2*ByteFormat.FIELD_LEN);
+                    int col2_val = getIntField(rowId,2);
                     if (col2_val < threshold2) {
-                        required_sum += this.rows.getInt(row_offset);
+                        required_sum += getIntField(rowId, 0);
                     }
                 }
             }
@@ -221,8 +218,7 @@ public class IndexedRowTable implements Table {
                 IntArrayList row_list = this.index.get(k);
                 for (int rowId : row_list) {
                     for (int colId = 0; colId < numCols; colId++) {
-                        int offset = ByteFormat.FIELD_LEN * (rowId * numCols + colId);
-                        int col_value = this.rows.getInt(offset);
+                        int col_value = getIntField(rowId, colId);
                         runningSum += col_value;
                     }
                 }
@@ -234,11 +230,10 @@ public class IndexedRowTable implements Table {
 
         } else{ // same method as for rowTable.java
             for (int rowId = 0; rowId < numRows; rowId++){
-                int row_offset = ByteFormat.FIELD_LEN*rowId*numCols;
-                int col0_val = this.rows.getInt(row_offset);
+                int col0_val = getIntField(rowId, 0);
                 if (col0_val > threshold){
                     for (int colId = 0; colId < numCols; colId++){
-                        runningSum += this.rows.getInt(row_offset + ByteFormat.FIELD_LEN*colId);
+                        runningSum += getIntField(rowId, colId);
                     }
                 }
             }
@@ -267,11 +262,9 @@ public class IndexedRowTable implements Table {
                 IntArrayList row_list = this.index.get(k);
                 for (int rowId : row_list) {
                     updatedRows+=1;
-                    int col3_offset = ByteFormat.FIELD_LEN*(rowId*numCols + 3);
-                    int col2_offset = ByteFormat.FIELD_LEN*(rowId*numCols + 2);
-                    int col3_value = this.rows.getInt(col3_offset);
-                    int col2_value = this.rows.getInt(col2_offset);
-                    this.rows.putInt(col3_offset, col3_value+col2_value);
+                    int col3_value = getIntField(rowId, 3);
+                    int col2_value = getIntField(rowId, 2);
+                    putIntField(rowId, 3, col2_value + col3_value);
                 }
                 if (this.index.lowerKey(k) == null){
                     break;
@@ -281,37 +274,32 @@ public class IndexedRowTable implements Table {
         }else if (this.indexColumn == 3){
             for (int rowId = 0; rowId < numRows; rowId++) {
 
-                int row_offset = ByteFormat.FIELD_LEN * rowId * numCols;
-                int col0_val = this.rows.getInt(row_offset);
+                int col0_val = getIntField(rowId, 0);
 
                 if (col0_val < threshold) {
                     updatedRows += 1;
 
-                    int col3_val = this.rows.getInt(row_offset + ByteFormat.FIELD_LEN * 3);
+                    int col3_val = getIntField(rowId, 3);
                     // remove the rowId in the index with key as the col3's old value
                     IntArrayList old_row_list = this.index.get(col3_val);
                     old_row_list.rem(rowId);
 
                     // get the col2 value for this row
-                    int col2_val = this.rows.getInt(row_offset + ByteFormat.FIELD_LEN * 2);
+                    int col2_val = getIntField(rowId, 2);
 
-                    int new_col3_val = col3_val + col2_val;
                     // insert the rowId in the index with key as the col3's new value
-                    addVal(rowId, new_col3_val);
-
                     // finally insert the new col3 value in the table as well
-                    this.rows.putInt(row_offset + ByteFormat.FIELD_LEN * 3, new_col3_val);
+                    putIntField(rowId, 3, col3_val + col2_val);
                 }
             }
         }else  {
             for (int rowId = 0; rowId < numRows; rowId++) {
-                int row_offset = ByteFormat.FIELD_LEN * rowId * numCols;
-                int col0_val = this.rows.getInt(row_offset);
+                int col0_val = getIntField(rowId, 0);
                 if (col0_val < threshold) {
                     updatedRows += 1;
-                    int col3_val = this.rows.getInt(row_offset + ByteFormat.FIELD_LEN * 3);
-                    int col2_val = this.rows.getInt(row_offset + ByteFormat.FIELD_LEN * 2);
-                    this.rows.putInt(row_offset + ByteFormat.FIELD_LEN *3, col3_val + col2_val);
+                    int col3_val = getIntField(rowId, 3);
+                    int col2_val = getIntField(rowId, 2);
+                    putIntField(rowId, 3, col3_val + col2_val);
                 }
             }
         }

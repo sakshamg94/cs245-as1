@@ -95,12 +95,11 @@ public class RowTable implements Table {
         // TODO: Implement this!
         long required_sum = 0;
         for (int rowId = 0; rowId < numRows; rowId++) {
-            int row_offset = ByteFormat.FIELD_LEN * rowId * numCols;
-            int col1_val = this.rows.getInt(row_offset + ByteFormat.FIELD_LEN);
+            int col1_val = getIntField(rowId, 1);
             if (col1_val > threshold1) {
-                int col2_val = this.rows.getInt(row_offset + 2*ByteFormat.FIELD_LEN);
+                int col2_val = getIntField(rowId, 2);
                 if (col2_val < threshold2) {
-                    required_sum += this.rows.getInt(row_offset);
+                    required_sum += getIntField(rowId, 0);
                 }
             }
         }
@@ -118,11 +117,10 @@ public class RowTable implements Table {
         // TODO: Implement this!
         long runningSum = 0;
         for (int rowId = 0; rowId < numRows; rowId++){
-            int row_offset = ByteFormat.FIELD_LEN*rowId*numCols;
-            int col0_val = this.rows.getInt(row_offset);
+            int col0_val = getIntField(rowId, 0);
             if (col0_val > threshold){
                 for (int colId = 0; colId < numCols; colId++){
-                    runningSum += this.rows.getInt(row_offset + ByteFormat.FIELD_LEN*colId);
+                    runningSum += getIntField(rowId,colId);
                 }
             }
         }

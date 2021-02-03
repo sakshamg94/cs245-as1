@@ -86,13 +86,11 @@ public class ColumnTable implements Table {
         // TODO: Implement this!
         long sum = 0;
         for (int rowId = 0; rowId<numRows; rowId++){
-            int col1_offset = ByteFormat.FIELD_LEN*(numRows  + rowId);
-            int col2_offset = ByteFormat.FIELD_LEN*(numRows*2  + rowId);
-            int col1_val = this.columns.getInt(col1_offset);
+            int col1_val = getIntField(rowId, 1);
             if (col1_val > threshold1){
-                int col2_val = this.columns.getInt(col2_offset);
+                int col2_val = getIntField(rowId,2);
                 if (col2_val<threshold2){
-                    sum+=this.columns.getInt(ByteFormat.FIELD_LEN*rowId);
+                    sum+=getIntField(rowId, 0);
                 }
             }
         }
@@ -110,10 +108,9 @@ public class ColumnTable implements Table {
         // TODO: Implement this!
         long runningSum = 0;
         for (int rowId = 0; rowId<numRows; rowId++){
-            if (this.columns.getInt(ByteFormat.FIELD_LEN*rowId)> threshold){
+            if (getIntField(rowId,0)> threshold){
                 for (int colId = 0; colId<numCols; colId++){
-                    runningSum+=this.columns.getInt
-                            (ByteFormat.FIELD_LEN*(numRows*colId + rowId));
+                    runningSum+=getIntField(rowId, colId);
                 }
             }
         }
