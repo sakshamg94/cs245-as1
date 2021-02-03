@@ -139,10 +139,34 @@ public class CustomTable implements Table {
          *      go to the col1 key, find subtree with col2 entry of this row and reduce the sum by col0 value
          *      use helper function to add the col0, NEW col1, col2 values to the multiindex
          * if colid ==2
-         *      for all keys in the multiindex that contain subtrees with the old col2 value as key, reduce the sum value by col0 amount
+         *      for all keys in the multiindex that contain subtrees with the old col2 value as key,
+         *          reduce the sum value by col0 amount
          *          use helper function to add the col0, col1, NEW col2 values to the multiindex
+         * else {}
          * update the table
          */
+        int row_offset = ByteFormat.FIELD_LEN*rowId*numCols;
+
+        int col1_original_val = this.getIntField(rowId, 1);
+        int col2_original_val = this.getIntField(rowId, 2);
+        int col0_original_val = this.getIntField(rowId, 0);
+
+        if (colId==0){
+            // remove rowId from old value's IntArrayList in index
+            IntArrayList old_row_list = this.indexCol0.get(col0_original_val);
+            old_row_list.rem(rowId);
+            // add rowId to new value's IntArrayList in index
+            this.addValIndex0(rowId, field);
+
+        }else if (colId == 1){
+
+        }else if(colId == 2){
+
+        }else{
+
+        }
+        this.rows.putInt(row_offset + ByteFormat.FIELD_LEN*colId, field);
+
     }
 
     /**
@@ -154,7 +178,12 @@ public class CustomTable implements Table {
     @Override
     public long columnSum() {
         // TODO: Implement this!
-        return 0;
+        long result = 0;
+        for(int rowId= 0; rowId<numRows; rowId++){
+            result += this.col0.getInt(ByteFormat.FIELD_LEN*rowId);
+        }
+        return result;
+
     }
 
     /**
